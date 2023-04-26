@@ -1,40 +1,51 @@
-// https://leetcode.com/problems/permutations/
-// TODO
-
-use std::mem::swap;
+// https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/
+// https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/submissions/939493276/
 
 struct Solution {}
 
 impl Solution {
-    pub fn permute(nums: Vec<i32>) -> Vec<Vec<i32>> {
-        let len = nums.len();
-        let mut result = vec![vec![]];
-        for i in 0..len {
-            for j in i + 1..len {}
+    pub fn reverse_parentheses(mut s: String) -> String {
+        let mut i = 0;
+        if s.len() == 0 {
+            return s;
         }
-        return result;
-    }
-
-    fn swap(nums: &mut Vec<i32>, i: usize, j: usize) {
-        let tmp = nums[i];
-        nums[i] = nums[j];
-        nums[j] = tmp;
-    }
-
-    fn generate_permutations(n: i32, vec: &Vec<i32>) -> Vec<i32> {
-        if n == 1 {
-            return vec;
-        }
-        Self::generate_permutations(n - 1, vec.clone());
-        for i in 0..n {
-            if n % 2 == 0 {
-                Self::swap(vec.clone(), i as usize, (n - 1) as usize);
-            } else {
-                Self::swap(vec.clone(), 0, (n - 1) as usize);
+        while i < s.len() - 1 {
+            if s.chars().nth(i).unwrap() == '(' {
+                break;
             }
-            Self::generate_permutations(n-1, vec.clone());
+            i += 1;
         }
-        return Vec::new();
+        if i == s.len() - 1 {
+            return s;
+        }
+
+        let mut j = i + 1;
+        let mut opened = 1;
+        while j < s.len() - 1 {
+            if s.chars().nth(j).unwrap() == ')' {
+                opened -= 1;
+                if opened == 0 {
+                    break;
+                }
+            } else if s.chars().nth(j).unwrap() == '(' {
+                opened += 1;
+            }
+            j += 1;
+        }
+        if j - i == 1 {
+            s.remove(j);
+            s.remove(i);
+            return Self::reverse_parentheses(s);
+        }
+        let (rest, end) = s.split_at(j);
+        let mut end = end.to_string();
+        end.remove(0); //remove )
+        let (start, mid) = rest.split_at(i);
+        let mut mid = mid.to_string();
+        mid.remove(0); //remove (
+        mid = Self::reverse_parentheses(mid);
+        mid = mid.chars().rev().collect(); //reverse
+        return Self::reverse_parentheses(start.to_string() + &mid + &end);
     }
 }
 
@@ -44,44 +55,86 @@ mod tests {
 
     #[test]
     fn test1() {
-        let permutations = Solution::permute(Vec::from([1, 2, 3]));
-        let expected = Vec::from([
-            Vec::from([1, 2, 3]),
-            Vec::from([1, 3, 2]),
-            Vec::from([2, 1, 3]),
-            Vec::from([2, 3, 1]),
-            Vec::from([3, 1, 2]),
-            Vec::from([3, 2, 1]),
-        ]);
-        verify(permutations, expected);
+        assert_eq!(Solution::reverse_parentheses(String::from("(abcd)")), "dcba");
     }
 
     #[test]
     fn test2() {
-        let permutations = Solution::permute(Vec::from([0, 1]));
-        let expected = Vec::from([
-            Vec::from([0, 1]),
-            Vec::from([1, 0]),
-        ]);
-        verify(permutations, expected);
+        assert_eq!(Solution::reverse_parentheses(String::from("(u(love)i)")), "iloveu");
     }
 
     #[test]
     fn test3() {
-        let permutations = Solution::permute(Vec::from([1]));
-        let expected = Vec::from([Vec::from([1]), ]);
-        verify(permutations, expected);
+        assert_eq!(Solution::reverse_parentheses(String::from("(ed(et(oc))el)")), "leetcode");
     }
 
-    fn verify(permutations: Vec<Vec<i32>>, expected: Vec<Vec<i32>>) {
-        'v_loop: for v in &expected {
-            for p in &permutations {
-                if v.eq(p) {
-                    continue 'v_loop;
-                }
-            }
-            println!("{:?} {:?}", permutations, expected);
-            panic!("{:?} not found", v)
-        }
+    #[test]
+    fn test4() {
+        assert_eq!(Solution::reverse_parentheses(String::from("vdgzyj()")), "vdgzyj");
+    }
+
+    #[test]
+    fn test5() {
+        assert_eq!(Solution::reverse_parentheses(String::from("ta()usw((((a))))")), "tauswa");
+    }
+
+    #[test]
+    fn test6() {
+        assert_eq!(Solution::reverse_parentheses(String::from("((((a))))")), "a");
+    }
+
+    #[test]
+    fn test7() {
+        assert_eq!(Solution::reverse_parentheses(String::from("sxmdll(q)eki(x)")), "sxmdllqekix");
+    }
+
+    #[test]
+    fn test8() {
+        assert_eq!(Solution::reverse_parentheses(String::from("eki(x)")), "ekix");
+    }
+
+    #[test]
+    fn test9() {
+        assert_eq!(Solution::reverse_parentheses(String::from("yhqqvjhjchlahdn(())")), "yhqqvjhjchlahdn");
+    }
+
+    #[test]
+    fn test10() {
+        assert_eq!(Solution::reverse_parentheses(String::from("(())")), "");
     }
 }
+
+// impl Solution {
+//     pub fn reverse_parentheses(mut s: String) -> String {
+//         let (mut i, mut j) = (0, s.len() - 1);
+//         while i < j {
+//             if s.chars().nth(i).unwrap() == '(' {
+//                 break;
+//             }
+//             i += 1;
+//         }
+//         if i == j {
+//             return s;
+//         }
+//         while j > 0 {
+//             if s.chars().nth(j).unwrap() == ')' {
+//                 break;
+//             }
+//             j -= 1;
+//         }
+//         if j - i == 1 {
+//             s.remove(j);
+//             s.remove(i);
+//             return s;
+//         }
+//         let (rest, end) = s.split_at(j);
+//         let mut end = end.to_string();
+//         end.remove(0); //remove )
+//         let (start, mid) = rest.split_at(i);
+//         let mut mid = mid.to_string();
+//         mid.remove(0); //remove (
+//         mid = Self::reverse_parentheses(mid);
+//         mid = mid.chars().rev().collect(); //reverse
+//         return start.to_string() + &mid + &end;
+//     }
+// }

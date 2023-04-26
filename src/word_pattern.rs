@@ -1,8 +1,36 @@
-// https://leetcode.com/problems/nim-game/description/
-// https://leetcode.com/problems/nim-game/submissions/936525620/
+// https://leetcode.com/problems/word-pattern/
+// https://leetcode.com/problems/word-pattern/submissions/936845501/
 
-pub fn can_win_nim(n: i32) -> bool {
-    n % 4 != 0
+use std::collections::HashMap;
+
+pub fn word_pattern(pattern: String, s: String) -> bool {
+    if pattern.len() != s.split(" ").collect::<Vec<&str>>().len() {
+        return false;
+    }
+    let mut map: HashMap<char, &str> = HashMap::new();
+    let mut words_map: HashMap<&str, char> = HashMap::new();
+    for i in 0..pattern.len() {
+        let mut p = pattern.chars();
+        let str = s.split(" ").collect::<Vec<&str>>();
+
+        let p_ith = &p.nth(i).unwrap();
+        let opt = map.get(p_ith);
+        match opt {
+            Some(val) => {
+                if val != &str[i] {
+                    return false;
+                }
+            }
+            None => {
+                if words_map.get(str[i]).is_some() {
+                    return false;
+                }
+                map.insert(*p_ith, str[i]);
+                words_map.insert(str[i], *p_ith);
+            }
+        }
+    }
+    return true;
 }
 
 #[cfg(test)]
@@ -11,46 +39,26 @@ mod tests {
 
     #[test]
     fn test1() {
-        assert_eq!(can_win_nim(1), true);
+        assert_eq!(word_pattern("abba".to_owned(), "dog cat cat dog".to_owned()), true);
     }
 
     #[test]
     fn test2() {
-        assert_eq!(can_win_nim(2), true);
+        assert_eq!(word_pattern("abba".to_owned(), "dog cat cat fish".to_owned()), false);
     }
 
     #[test]
     fn test3() {
-        assert_eq!(can_win_nim(3), true);
+        assert_eq!(word_pattern("aaaa".to_owned(), "dog cat cat dog".to_owned()), false);
     }
 
     #[test]
     fn test4() {
-        assert_eq!(can_win_nim(4), false);
+        assert_eq!(word_pattern("abba".to_owned(), "dog dog dog dog".to_owned()), false);
     }
 
     #[test]
     fn test5() {
-        assert_eq!(can_win_nim(5), true);
-    }
-
-    #[test]
-    fn test6() {
-        assert_eq!(can_win_nim(6), true);
-    }
-
-    #[test]
-    fn test7() {
-        assert_eq!(can_win_nim(7), true);
-    }
-
-    #[test]
-    fn test8() {
-        assert_eq!(can_win_nim(8), false);
-    }
-
-    #[test]
-    fn test9() {
-        assert_eq!(can_win_nim(9), true);
+        assert_eq!(word_pattern("aaa".to_owned(), "aa aa aa aa".to_owned()), false);
     }
 }
